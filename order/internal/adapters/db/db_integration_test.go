@@ -3,14 +3,15 @@ package db
 import (
 	"context"
 	"fmt"
+	"log"
+	"testing"
+	"time"
+
 	"github.com/docker/go-connections/nat"
 	"github.com/huseyinbabal/microservices/order/internal/application/core/domain"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
-	"log"
-	"testing"
-	"time"
 )
 
 type OrderDatabaseTestSuite struct {
@@ -47,7 +48,7 @@ func (o *OrderDatabaseTestSuite) SetupSuite() {
 func (o *OrderDatabaseTestSuite) Test_Should_Save_Order() {
 	adapter, err := NewAdapter(o.DataSourceUrl)
 	o.Nil(err)
-	saveErr := adapter.Save(&domain.Order{})
+	saveErr := adapter.Save(context.Background(), &domain.Order{})
 	o.Nil(saveErr)
 }
 
@@ -60,8 +61,8 @@ func (o *OrderDatabaseTestSuite) Test_Should_Get_Order() {
 			UnitPrice:   1.32,
 		},
 	})
-	adapter.Save(&order)
-	ord, _ := adapter.Get(order.ID)
+	adapter.Save(context.Background(), &order)
+	ord, _ := adapter.Get(context.Background(), order.ID)
 	o.Equal(int64(2), ord.CustomerID)
 }
 
